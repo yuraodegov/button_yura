@@ -1,0 +1,53 @@
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import json
+
+from model import ButtonSimulator
+
+simulator = ButtonSimulator()
+
+
+class Handler(BaseHTTPRequestHandler):
+
+    def do_GET(self):
+        if self.path == "/":
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"OK")
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_POST(self):
+        if self.path == "/event":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length)
+
+            try:
+                data = json.loads(body)
+            except Exception:
+                self.send_response(400)
+                self.end_headers()
+                return
+
+            button = data.get("button")
+            action = data.get("action")
+
+            result = simulator.handle_event(button, action)
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+
+            self.wfile.write(json.dumps(result).encode())
+
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+
+server = HTTPServer(("0.0.0.0", 5000), Handler)
+
+
+if __name__ == "__main__":
+    print("Server running on port 5000...")
+    server.serve_forever()
