@@ -13,6 +13,15 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.end_headers()
             self.wfile.write(b"OK")
+
+        elif self.path == "/ui":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
+            self.end_headers()
+
+            with open("simulator/ui.html", "r") as f:
+                self.wfile.write(f.read().encode())
+
         else:
             self.send_response(404)
             self.end_headers()

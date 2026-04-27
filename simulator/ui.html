@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Button Simulator</title>
+</head>
+<body>
+    <h1>Button Simulator</h1>
+
+    <button onclick="sendEvent('press')">Press</button>
+    <button onclick="sendEvent('release')">Release</button>
+
+    <pre id="output"></pre>
+
+    <script>
+        async function sendEvent(action) {
+            const res = await fetch('/event', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({button: 1, action})
+            });
+
+            const data = await res.json();
+            document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
