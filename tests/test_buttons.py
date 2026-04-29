@@ -44,7 +44,7 @@ def test_double_click(server):
     assert res2.json()["event"] == "DOUBLE_CLICK"
 
 
-    def test_press_without_release(server):
+def test_press_without_release(server):
     """Press без release — состояние должно быть PRESSED"""
     res = requests.post(f"{BASE}/event", json={"button": 2, "action": "press"})
     assert res.json()["event"] == "PRESS"
