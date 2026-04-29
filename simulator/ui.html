@@ -2,25 +2,158 @@
 <html>
 <head>
     <title>Button Simulator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: monospace;
+            background: #1e1e2e;
+            color: #cdd6f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 40px;
+            color: #89b4fa;
+            letter-spacing: 2px;
+        }
+
+        .buttons-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-group span {
+            font-size: 12px;
+            color: #a6adc8;
+        }
+
+        .btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #89b4fa;
+            background: #313244;
+            color: #cdd6f4;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.1s;
+            user-select: none;
+        }
+
+        .btn:active, .btn.pressed {
+            background: #89b4fa;
+            color: #1e1e2e;
+            transform: scale(0.95);
+        }
+
+        .event-badge {
+            margin-bottom: 20px;
+            padding: 10px 24px;
+            border-radius: 20px;
+            background: #313244;
+            font-size: 18px;
+            color: #a6e3a1;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .log {
+            width: 100%;
+            max-width: 500px;
+            background: #181825;
+            border-radius: 10px;
+            padding: 16px;
+            height: 250px;
+            overflow-y: auto;
+            font-size: 13px;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #313244;
+            color: #a6adc8;
+        }
+
+        .log-entry .event { color: #a6e3a1; font-weight: bold; }
+        .log-entry .error { color: #f38ba8; font-weight: bold; }
+        .log-entry .time { color: #6c7086; margin-right: 8px; }
+    </style>
 </head>
 <body>
-    <h1>Button Simulator</h1>
+    <h1>⬤ BUTTON SIMULATOR</h1>
 
-    <button onclick="sendEvent('press')">Press</button>
-    <button onclick="sendEvent('release')">Release</button>
+    <div class="buttons-row">
+        <div class="btn-group">
+            <button class="btn" id="btn1"
+                onmousedown="press(1)" onmouseup="release(1)"
+                ontouchstart="press(1)" ontouchend="release(1)">BTN 1</button>
+            <span>Button 1</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn" id="btn2"
+                onmousedown="press(2)" onmouseup="release(2)"
+                ontouchstart="press(2)" ontouchend="release(2)">BTN 2</button>
+            <span>Button 2</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn" id="btn3"
+                onmousedown="press(3)" onmouseup="release(3)"
+                ontouchstart="press(3)" ontouchend="release(3)">BTN 3</button>
+            <span>Button 3</span>
+        </div>
+    </div>
 
-    <pre id="output"></pre>
+    <div class="event-badge" id="last-event">— нет событий —</div>
+
+    <div class="log" id="log"></div>
 
     <script>
-        async function sendEvent(action) {
+        async function sendEvent(button, action) {
             const res = await fetch('/event', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({button: 1, action})
+                body: JSON.stringify({button, action})
             });
-
             const data = await res.json();
-            document.getElementById("output").innerText = JSON.stringify(data, null, 2);
+            updateUI(button, data);
+        }
+
+        function press(button) {
+            document.getElementById(`btn${button}`).classList.add('pressed');
+            sendEvent(button, 'press');
+        }
+
+        function release(button) {
+            document.getElementById(`btn${button}`).classList.remove('pressed');
+            sendEvent(button, 'release');
+        }
+
+        function updateUI(button, data) {
+            const event = data.event || data.error || '?';
+            const isError = !!data.error;
+
+            document.getElementById('last-event').textContent =
+                `BTN${button}: ${event}`;
+
+            const log = document.getElementById('log');
+            const now = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="time">${now}</span> BTN${button} → <span class="${isError ? 'error' : 'event'}">${event}</span>`;
+            log.prepend(entry);
         }
     </script>
 </body>
