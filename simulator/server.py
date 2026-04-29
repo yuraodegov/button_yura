@@ -21,7 +21,7 @@ class Handler(BaseHTTPRequestHandler):
 
         elif self.path == "/ui":
             self.send_response(200)
-            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
             # fix пути к ui.html
             ui_path = os.path.join(os.path.dirname(__file__), "ui.html")
