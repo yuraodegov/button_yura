@@ -1,26 +1,27 @@
-name: CI
+```yaml
+name: CI Pipeline
 
 on:
   push:
-  pull_request:
+    branches: [ main ]
 
 jobs:
-  test:
+  build-test-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
+    - name: Build Docker image
+      run: docker build -t button-yura .
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+    - name: Run tests
+      run: docker run button-yura pytest tests/
 
-      - name: Run tests
-        run: |
-          python -m pytest tests/
+    - name: Simulate Kubernetes deploy
+      run: |
+        echo "Applying Kubernetes manifests..."
+        cat k8s/deployment.yaml
+        cat k8s/service.yaml
+```
