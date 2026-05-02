@@ -1,14 +1,19 @@
+
 import sys
 import os
-sys.path.insert(0, os.path.dirname(__file__))  # fix импорта model
-
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import socket
 import json
 import logging
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# Fix import path
+sys.path.insert(0, os.path.dirname(__file__))
 
 from model import ButtonSimulator
 
 logging.basicConfig(level=logging.INFO)
+
+simulator = ButtonSimulator()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -23,7 +28,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
-            # fix пути к ui.html
+
             ui_path = os.path.join(os.path.dirname(__file__), "ui.html")
             with open(ui_path, "r") as f:
                 self.wfile.write(f.read().encode())
@@ -36,7 +41,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/event":
             content_length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(content_length)
-            logging.info(f"POST /event body: {body}")  # fix логирование
+
+            logging.info(f"POST /event body: {body}")
 
             try:
                 data = json.loads(body)
@@ -48,8 +54,12 @@ class Handler(BaseHTTPRequestHandler):
             button = data.get("button")
             action = data.get("action")
 
-            # fix: создаём новый simulator на каждый запрос — нет, лучше сбрасывать состояние
+            # FSM logic
             result = simulator.handle_event(button, action)
+
+            # добавляем pod hostname прямо в результат
+            hostname = socket.gethostname()
+            result["pod"] = hostname
 
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -61,12 +71,10 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def log_message(self, format, *args):
-        pass  # отключаем стандартные логи сервера
+        pass
 
-
-simulator = ButtonSimulator()
-server = HTTPServer(("0.0.0.0", 5000), Handler)
 
 if __name__ == "__main__":
     print("Server running on port 5000...")
+    server = HTTPServer(("0.0.0.0", 5000), Handler)
     server.serve_forever()

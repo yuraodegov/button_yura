@@ -4,7 +4,7 @@
 #define LONG_PRESS_THRESHOLD 1.0
 #define DOUBLE_CLICK_WINDOW 0.5
 
-typedef enum {
+#typedef enum {
     IDLE,
     PRESSED
 } State;

@@ -90,71 +90,154 @@
         .log-entry .event { color: #a6e3a1; font-weight: bold; }
         .log-entry .error { color: #f38ba8; font-weight: bold; }
         .log-entry .time { color: #6c7086; margin-right: 8px; }
+
+        /* ===== TEST UI ===== */
+
+        .tests-section {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 30px;
+        }
+
+        .tests-section h2 {
+            color: #89b4fa;
+            font-size: 16px;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: #313244;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .test-status.idle    { color: #6c7086; }
+        .test-status.running { color: #fab387; }
+        .test-status.pass    { color: #a6e3a1; }
+        .test-status.fail    { color: #f38ba8; }
+
+        .run-all-btn {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            background: #89b4fa;
+            color: #1e1e2e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .run-all-btn:disabled {
+            background: #45475a;
+            color: #6c7086;
+        }
     </style>
 </head>
 <body>
-    <h1>● BUTTON SIMULATOR</h1>
 
-    <div class="buttons-row">
-        <div class="btn-group">
-            <button class="btn" id="btn1"
-                onmousedown="press(1)" onmouseup="release(1)"
-                ontouchstart="press(1)" ontouchend="release(1)">BTN 1</button>
-            <span>Button 1</span>
-        </div>
-        <div class="btn-group">
-            <button class="btn" id="btn2"
-                onmousedown="press(2)" onmouseup="release(2)"
-                ontouchstart="press(2)" ontouchend="release(2)">BTN 2</button>
-            <span>Button 2</span>
-        </div>
-        <div class="btn-group">
-            <button class="btn" id="btn3"
-                onmousedown="press(3)" onmouseup="release(3)"
-                ontouchstart="press(3)" ontouchend="release(3)">BTN 3</button>
-            <span>Button 3</span>
-        </div>
-    </div>
+<h1>● BUTTON SIMULATOR</h1>
 
-    <div class="event-badge" id="last-event">— нет событий —</div>
+<div class="buttons-row">
+    <button class="btn" id="btn1" onmousedown="press(1)" onmouseup="release(1)">BTN1</button>
+    <button class="btn" id="btn2" onmousedown="press(2)" onmouseup="release(2)">BTN2</button>
+    <button class="btn" id="btn3" onmousedown="press(3)" onmouseup="release(3)">BTN3</button>
+</div>
 
-    <div class="log" id="log"></div>
+<div class="event-badge" id="last-event">— нет событий —</div>
+<div class="log" id="log"></div>
 
-    <script>
-        async function sendEvent(button, action) {
-            const res = await fetch('/event', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({button, action})
-            });
-            const data = await res.json();
-            updateUI(button, data);
+<!-- TESTS -->
+<div class="tests-section">
+    <h2>▶ TESTS</h2>
+    <button class="run-all-btn" id="run-all-btn" onclick="runAllTests()">RUN ALL TESTS</button>
+    <div id="test-list"></div>
+</div>
+
+<script>
+async function sendEvent(button, action) {
+    const res = await fetch('/event', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({button, action})
+    });
+    return res.json();
+}
+
+function press(b) {
+    document.getElementById('btn'+b).classList.add('pressed');
+    sendEvent(b,'press').then(update);
+}
+
+function release(b) {
+    document.getElementById('btn'+b).classList.remove('pressed');
+    sendEvent(b,'release').then(update);
+}
+
+function update(data){
+    document.getElementById('last-event').textContent = JSON.stringify(data);
+}
+
+/* ===== TESTS ===== */
+
+const TESTS = [
+    "short_click","long_click","double_click"
+];
+
+function renderTests(){
+    document.getElementById('test-list').innerHTML =
+        TESTS.map(t=>`<div>${t}: <span id="s_${t}">IDLE</span></div>`).join('');
+}
+
+async function test_short_click(){
+    await sendEvent(1,'press'); await sleep(200);
+    let r=await sendEvent(1,'release');
+    if(r.event!=='SHORT_CLICK') throw r;
+}
+
+async function test_long_click(){
+    await sendEvent(1,'press'); await sleep(1500);
+    let r=await sendEvent(1,'release');
+    if(r.event!=='LONG_CLICK') throw r;
+}
+
+async function test_double_click(){
+    await sendEvent(1,'press'); await sleep(100);
+    await sendEvent(1,'release');
+    await sleep(200);
+    await sendEvent(1,'press'); await sleep(100);
+    let r=await sendEvent(1,'release');
+    if(r.event!=='DOUBLE_CLICK') throw r;
+}
+
+const MAP = {
+    short_click:test_short_click,
+    long_click:test_long_click,
+    double_click:test_double_click
+};
+
+async function runAllTests(){
+    for(let t of TESTS){
+        let el=document.getElementById('s_'+t);
+        el.textContent='RUN';
+        try{
+            await MAP[t]();
+            el.textContent='PASS';
+        }catch{
+            el.textContent='FAIL';
         }
+    }
+}
 
-        function press(button) {
-            document.getElementById(`btn${button}`).classList.add('pressed');
-            sendEvent(button, 'press');
-        }
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
-        function release(button) {
-            document.getElementById(`btn${button}`).classList.remove('pressed');
-            sendEvent(button, 'release');
-        }
+renderTests();
+</script>
 
-        function updateUI(button, data) {
-            const event = data.event || data.error || '?';
-            const isError = !!data.error;
-
-            document.getElementById('last-event').textContent =
-                `BTN${button}: ${event}`;
-
-            const log = document.getElementById('log');
-            const now = new Date().toLocaleTimeString();
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `<span class="time">${now}</span> BTN${button} → <span class="${isError ? 'error' : 'event'}">${event}</span>`;
-            log.prepend(entry);
-        }
-    </script>
 </body>
 </html>
