@@ -1,27 +1,27 @@
-```yaml
+
 name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Build Docker image
-      run: docker build -t button-yura .
+      - name: Build Docker image
+        run: docker build -t button-yura .
 
-    - name: Run tests
-      run: docker run button-yura pytest tests/
+      - name: Run tests inside container
+        run: docker run button-yura pytest tests/
 
-    - name: Simulate Kubernetes deploy
-      run: |
-        echo "Applying Kubernetes manifests..."
-        cat k8s/deployment.yaml
-        cat k8s/service.yaml
-```
+      - name: Simulate Kubernetes deploy
+        run: |
+          echo "Applying Kubernetes manifests..."
+          cat k8s/deployment.yaml
+          cat k8s/service.yaml
