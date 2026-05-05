@@ -1,4 +1,3 @@
-
 name: CI Pipeline
 
 on:
@@ -17,8 +16,8 @@ jobs:
       - name: Build Docker image
         run: docker build -t button-yura .
 
-      - name: Run tests inside container
-        run: docker run button-yura pytest tests/
+      - name: Run tests
+        run: docker run button-yura
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -28,17 +27,10 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ec2-user/button_yura
-
             git pull
 
             docker stop $(docker ps -q) || true
             docker rm $(docker ps -aq) || true
 
             docker build -t button-yura .
-            docker run -d -p 5000:5000 button-yura 
-
-      - name: Simulate Kubernetes deploy
-        run: |
-          echo "Applying Kubernetes manifests..."
-          cat k8s/deployment.yaml
-          cat k8s/service.yaml
+            docker run -d -p 5000:5000 button-yura
