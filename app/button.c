@@ -216,7 +216,7 @@ void buttonHandler(void)
 			else if ((timerTimeOut(&push_button[i].timer, BUTTON_LONG_CLICK_PERIOD) == TIMER_TIMEOUT))
 			{
 				/* Long press detected */
-				BUTTON_STRING("Push button Long press\r\n");
+				BUTTON_STRING("Push button Long press xxx\r\n");
 
 				/* Execute button task */
 				button_long_click(i);
