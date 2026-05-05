@@ -215,12 +215,11 @@ void buttonHandler(void)
 			/* Button is still pressed check for long press */
 			else if ((timerTimeOut(&push_button[i].timer, BUTTON_LONG_CLICK_PERIOD) == TIMER_TIMEOUT))
 			{
-				BUTTON_STRING("BROKEN\r\n");
 				/* Long press detected */
-				/*BUTTON_STRING("Push button Long press\r\n");
+				BUTTON_STRING("Push button Long press\r\n");
 
 				/* Execute button task */
-				//button_long_click(i);
+				button_long_click(i);
 
 				/* Wait for button release */
 				push_button[i].state = LONG_CLICK;
@@ -240,7 +239,7 @@ void buttonHandler(void)
 			else if (position == BUTTON_PRESS)
 			{
 				/* Second press detected */
-				BUTTON_PRINTF("Push button No. %d Double press\r\n", i);
+				BUTTON_PRINTF("Push button No. $d Double press\r\n", i);
 
 				/* Execute button task */
 				button_double_click(i);
