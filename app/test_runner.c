@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "button.h"
 
-int simulated_input = 1;
+int simulated_input = 0;
 
 int getInput(int btn) {
     return simulated_input;
@@ -12,21 +12,26 @@ int main() {
 
     buttonsInitialize();
 
-    // 1. Сначала держим RELEASE
+    // --- PRESS ---
     simulated_input = 1;
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 100; i++) {
         buttonHandler();
     }
 
-    // 2. Потом PRESS
+    // --- RELEASE ---
     simulated_input = 0;
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 100; i++) {
         buttonHandler();
     }
 
-    // 3. Потом RELEASE
+    // --- PRESS AGAIN (для long / double) ---
     simulated_input = 1;
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 100; i++) {
+        buttonHandler();
+    }
+
+    simulated_input = 0;
+    for (int i = 0; i < 100; i++) {
         buttonHandler();
     }
 

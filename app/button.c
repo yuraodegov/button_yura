@@ -164,7 +164,7 @@ void buttonHandler(void)
 		/* Read push button position with De-bounce */
 		updateInputFilter(&button_debouncer[i], getInput(BUTTON_1 + i));
 
-		ButtonPosition position = (getInputFilter(&button_debouncer[i]) ? BUTTON_RELEASE : BUTTON_PRESS);
+		ButtonPosition position = (getInputFilter(&button_debouncer[i]) ? BUTTON_PRESS : BUTTON_RELEASE);
 
 		/* Push Buttons states */
 		switch(push_button[i].state)
@@ -180,6 +180,7 @@ void buttonHandler(void)
 			else if (timerTimeOut(&push_button[i].timer, BUTTON_WAIT_FOR_RLEASE) == TIMER_TIMEOUT)
 			{
 				push_button[i].state++;
+				break;
 			}
 
 

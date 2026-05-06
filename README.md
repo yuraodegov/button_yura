@@ -1,54 +1,93 @@
-# Button Yura – Embedded Button FSM Simulator
+# Embedded Button FSM Simulator
 
 ## 📖 Overview
 
-This project simulates an embedded button handling system (Finite State Machine) using Python.
+Production-style simulation platform for embedded button handling logic based on a Finite State Machine (FSM) architecture.
 
-Originally inspired by real C firmware logic, it reproduces:
+Originally inspired by real embedded firmware behavior written in C, this project reproduces timing-based button interactions and exposes them through a REST API interface.
+
+Supported events:
 
 * Short Click
 * Long Click
 * Double Click
 
-The system exposes a REST API for event simulation and includes automated integration tests.
+The project includes automated integration testing, containerized deployment, and CI/CD automation.
 
 ---
 
-## 🏗️ Architecture
+## 🌐 Live Demo
 
-* `app/` – original C logic (reference implementation)
-* `simulator/` – Python FSM + HTTP server
-* `tests/` – integration tests using pytest
-* `.github/workflows/` – CI/CD pipeline
+http://ec2-13-60-47-3.eu-north-1.compute.amazonaws.com:5000/ui
 
 ---
 
-## 🚀 How to Run
+## 🏗️ Project Architecture
 
-### Run locally
+```text
+app/                    Original C reference logic
+simulator/              Python FSM engine + REST API server
+tests/                  Automated integration tests (pytest)
+k8s/                    Kubernetes manifests
+.github/workflows/      GitHub Actions CI pipeline
+```
+
+---
+
+## ⚙️ Core Features
+
+* FSM-based embedded button simulation
+* REST API for hardware-event emulation
+* Timing-based event processing
+* Automated integration testing with pytest
+* Docker containerization
+* CI/CD pipeline using GitHub Actions
+* Kubernetes deployment support
+* Multi-pod runtime debugging and hostname tracing
+
+---
+
+## 🚀 Run Locally
+
+### Install dependencies
 
 ```bash
 pip install -r requirements.txt
+```
+
+### Start simulator
+
+```bash
 python simulator/server.py
 ```
 
-Server will start and listen for incoming HTTP requests.
+Server will start locally and expose the REST API.
 
 ---
 
-### Run tests
+## 🧪 Automated Testing
+
+Run integration tests:
 
 ```bash
 pytest tests/
 ```
 
+Test coverage includes:
+
+* Button press/release flows
+* Short click detection
+* Long click timing validation
+* Double click recognition
+* API-level verification
+
 ---
 
-## 🌐 API
+## 🌐 REST API
 
 ### POST /event
 
-Send button action:
+Simulate button interaction:
 
 ```json
 {
@@ -57,7 +96,7 @@ Send button action:
 }
 ```
 
-### Example response
+### Example Response
 
 ```json
 {
@@ -69,9 +108,9 @@ Send button action:
 
 ---
 
-## 🐳 Docker
+## 🐳 Docker Deployment
 
-Run the project using Docker Compose:
+Run using Docker Compose:
 
 ```bash
 docker-compose up --build
@@ -79,62 +118,70 @@ docker-compose up --build
 
 This will:
 
-* build the container
-* start the simulator service
-* allow API interaction
+* Build the container image
+* Launch the simulator service
+* Expose the REST API
 
 ---
 
-## ⚙️ CI/CD
+## ☸️ Kubernetes Deployment
 
-This project uses GitHub Actions pipeline:
+Example deployment:
 
-Pipeline steps:
-
-* Install dependencies
-* Run automated tests (pytest)
-* Validate system behavior
-
-CI configuration:
-
+```bash
+kubectl apply -f k8s/
 ```
+
+Features:
+
+* Deployment + Service configuration
+* Multi-replica scaling
+* Load balancing across pods
+* Runtime pod identification
+
+---
+
+## 🔄 CI/CD Pipeline
+
+GitHub Actions pipeline automatically performs:
+
+* Dependency installation
+* Automated testing
+* Container build validation
+* CI workflow verification
+
+Pipeline configuration:
+
+```text
 .github/workflows/ci.yml
 ```
 
 ---
 
-## 🧪 Testing
-
-* Framework: `pytest`
-* Type: integration testing
-* Covers:
-
-  * button press/release flows
-  * timing-based events (short/long/double click)
-  * API-level validation
-
----
-
 ## 🧠 DevOps Highlights
 
-* Automated testing with pytest
-* CI pipeline with GitHub Actions
-* Containerized environment (Docker)
-* Clear separation between firmware logic and simulation layer
-* REST-based interaction for system testing
+* Production-like CI/CD workflow
+* Automated integration testing
+* Containerized infrastructure
+* Kubernetes orchestration
+* REST-based system validation
+* Separation between firmware logic and simulation layer
+* Debug-oriented runtime visibility
 
 ---
 
 ## 📌 Future Improvements
 
-* Kubernetes deployment (k8s manifests)
-* Infrastructure as Code (Terraform)
-* Monitoring (Prometheus + Grafana)
-* Load testing
+* Terraform infrastructure provisioning
+* Helm charts
+* Prometheus + Grafana monitoring
+* Load and stress testing
+* AWS EKS deployment
 
 ---
 
 ## 👤 Author
 
 Yura Odegov
-QA Engineer / DevOps-oriented Engineer
+
+QA Automation Engineer | DevOps-oriented Engineer

@@ -23,7 +23,6 @@ def build():
 
 
 def run_button():
-    """Собираем + запускаем бинарник"""
     build()
     result = subprocess.run(
         [BINARY],
