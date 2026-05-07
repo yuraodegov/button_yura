@@ -6,6 +6,8 @@ COPY . .
 
 RUN apt-get update && apt-get install -y gcc
 
-RUN pip install pytest
+RUN pip install pytest flask
 
-CMD ["pytest", "tests/"]
+EXPOSE 5000
+
+CMD ["python", "simulator/server.py"]
