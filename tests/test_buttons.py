@@ -65,5 +65,23 @@ def test_process_completed():
 def test_multiple_clicks():
     output = run_button()
 
+
+def test_no_hello_world():
+    output = run_button()
+
+    assert "HELLO WORLD" not in output    
+
+def test_button_fsm_flow():
+    output = run_button()
+
+    assert "First press" in output
+    assert "Long press" in output
+    assert "released" in output.lower()    
+
+def test_dispense_triggered():
+    output = run_button()
+
+    assert "DISPENSE" in output    
+
     assert "START TEST" in output
     assert "END TEST" in output    

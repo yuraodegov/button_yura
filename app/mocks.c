@@ -12,9 +12,14 @@ void timerStart(uint32_t* t) {
 }
 
 int timerTimeOut(uint32_t* t, int period) {
-    (*t)++;
-    return (*t > period) ? 1 : 0;   // важно: вернуть 1/0
+    return 1;
 }
+
+
+//int timerTimeOut(uint32_t* t, int period) {
+  //  (*t)++;
+    //return (*t > period) ? 1 : 0;   // важно: вернуть 1/0
+//}
 
 // ===== MOCK FILTER =====
 void initializeInputFilter(InputFilter* f, int val) {
@@ -49,4 +54,20 @@ void stopSodaDispense() {
 // ===== MOCK LEVEL =====
 void sodaLevelUpdate() {
     printf("LEVEL UPDATE\n");
+}
+
+#include <stdarg.h>
+
+void terminalString(char *str)
+{
+    printf("%s", str);
+}
+
+void terminalPrint(const char *fmt, ...)
+{
+    va_list args;
+
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
 }

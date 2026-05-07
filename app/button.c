@@ -17,7 +17,7 @@
 #include "ws2812b.h"
 #include "input_filter.h"
 
-
+#define BUTTON_DEBUG
 #ifdef  BUTTON_DEBUG
 #define BUTTON_STRING(str)		terminalString(str)
 #define BUTTON_PRINTF(...)    	terminalPrint(__VA_ARGS__)
@@ -81,6 +81,7 @@ static void button_first_click(uint8_t button)
 	{
 		if (getDispenserState() == DISPENSER_READY)
 		{
+			//printf("HELLO WORLD\n");
 			SodaDispenseMs(1);
 
 		}
@@ -243,7 +244,7 @@ void buttonHandler(void)
 				BUTTON_PRINTF("Push button No. %d Double press\r\n", i);
 
 				/* Execute button task */
-				button_double_click(i);
+				//button_double_click(i);
 
 				/* Wait for Button release */
 				timerStart(&push_button[i].timer);
