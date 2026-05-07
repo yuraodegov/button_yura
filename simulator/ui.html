@@ -1,3 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Button Simulator</title>
+
+<style>
+
+body{
+    background:#1e1e2e;
+    color:#cdd6f4;
+    font-family:monospace;
+    display:flex;
+    justify-content:center;
+    padding-top:40px;
+}
+
+.container{
+    width:700px;
+}
+
+h1{
+    color:#89b4fa;
+}
+
+.buttons{
+    display:flex;
+    gap:20px;
+    margin-top:30px;
+}
+
+.btn{
+    width:100px;
+    height:100px;
+    border-radius:50%;
+    border:3px solid #89b4fa;
+    background:transparent;
+    color:white;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.btn.pressed{
+    background:#89b4fa;
+    color:black;
+}
+
+#last-event{
+    margin-top:30px;
+    background:#313244;
+    padding:20px;
+    border-radius:10px;
+    color:#a6e3a1;
+}
+
+#test-list{
+    margin-top:20px;
+    background:#11111b;
+    padding:20px;
+    border-radius:10px;
+    min-height:200px;
+}
+
+#run-all-btn{
+    margin-top:20px;
+    width:100%;
+    padding:15px;
+    font-size:18px;
+    background:#89b4fa;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>BUTTON SIMULATOR</h1>
+
+<div class="buttons">
+
+<button
+    id="btn1"
+    class="btn"
+    onmousedown="press(1)"
+    onmouseup="release(1)">
+    BTN1
+</button>
+
+<button
+    id="btn2"
+    class="btn"
+    onmousedown="press(2)"
+    onmouseup="release(2)">
+    BTN2
+</button>
+
+<button
+    id="btn3"
+    class="btn"
+    onmousedown="press(3)"
+    onmouseup="release(3)">
+    BTN3
+</button>
+
+</div>
+
+<div id="last-event">
+    waiting event...
+</div>
+
+<button
+    id="run-all-btn"
+    onclick="runAllTests()">
+    RUN ALL TESTS
+</button>
+
+<div id="test-list">
+    tests output...
+</div>
+
 <script>
 
 async function sendEvent(button, action) {
@@ -43,10 +172,6 @@ function update(data) {
     document.getElementById('last-event').textContent =
         JSON.stringify(data);
 }
-
-/* =========================================
-   REAL PYTEST RUNNER
-========================================= */
 
 async function runAllTests() {
 
@@ -132,3 +257,6 @@ async function runAllTests() {
 }
 
 </script>
+
+</body>
+</html>
