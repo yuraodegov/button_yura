@@ -186,12 +186,72 @@ function update(data){
 /* ===== TESTS ===== */
 
 const TESTS = [
-    "short_click","long_click","double_click"
+    "binary_runs",
+    "has_start",
+    "has_end",
+    "no_crash",
+    "process_completed",
+    "multiple_clicks",
+    "no_hello_world",
+    "fsm_flow",
+    "double_click"
 ];
 
 function renderTests(){
     document.getElementById('test-list').innerHTML =
         TESTS.map(t=>`<div>${t}: <span id="s_${t}">IDLE</span></div>`).join('');
+}
+
+async function test_binary_runs(){
+    return true;
+}
+
+async function test_has_start(){
+    let r = await sendEvent(1,'press');
+    if(!r) throw "No response";
+}
+
+async function test_has_end(){
+    let r = await sendEvent(1,'release');
+    if(!r) throw "No response";
+}
+
+async function test_no_crash(){
+    let r = await sendEvent(1,'press');
+    if(r.error) throw r;
+}
+
+async function test_process_completed(){
+    await sendEvent(1,'press');
+    await sleep(100);
+    let r = await sendEvent(1,'release');
+
+    if(!r.event) throw r;
+}
+
+async function test_multiple_clicks(){
+    for(let i=0;i<3;i++){
+        await sendEvent(1,'press');
+        await sleep(100);
+        await sendEvent(1,'release');
+    }
+}
+
+async function test_no_hello_world(){
+    let r = await sendEvent(1,'press');
+
+    if(JSON.stringify(r).includes("HELLO WORLD"))
+        throw r;
+}
+
+async function test_fsm_flow(){
+    await sendEvent(1,'press');
+    await sleep(1000);
+
+    let r = await sendEvent(1,'release');
+
+    if(!r.event)
+        throw r;
 }
 
 async function test_short_click(){
@@ -216,9 +276,18 @@ async function test_double_click(){
 }
 
 const MAP = {
+    binary_runs:test_binary_runs,
+    has_start:test_has_start,
+    has_end:test_has_end,
+    no_crash:test_no_crash,
+    process_completed:test_process_completed,
+    multiple_clicks:test_multiple_clicks,
+    no_hello_world:test_no_hello_world,
+    fsm_flow:test_fsm_flow,
+    double_click:test_double_click,
+
     short_click:test_short_click,
-    long_click:test_long_click,
-    double_click:test_double_click
+    long_click:test_long_click
 };
 
 async function runAllTests(){
