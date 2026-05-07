@@ -240,7 +240,7 @@ void buttonHandler(void)
 			else if (position == BUTTON_PRESS)
 			{
 				/* Second press detected */
-				BUTTON_PRINTF("Push button No. $d Double press\r\n", i);
+				BUTTON_PRINTF("Push button No. %d Double press\r\n", i);
 
 				/* Execute button task */
 				button_double_click(i);
