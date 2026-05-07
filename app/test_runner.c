@@ -3,6 +3,7 @@
 
 int simulated_input = 0;
 
+// mock GPIO input
 int getInput(int btn)
 {
     return simulated_input;
@@ -14,7 +15,10 @@ int main()
 
     buttonsInitialize();
 
-    // PRESS
+    // =========================
+    // FIRST CLICK
+    // =========================
+
     simulated_input = 1;
 
     for (int i = 0; i < 50; i++)
@@ -22,7 +26,24 @@ int main()
         buttonHandler();
     }
 
-    // RELEASE
+    simulated_input = 0;
+
+    for (int i = 0; i < 50; i++)
+    {
+        buttonHandler();
+    }
+
+    // =========================
+    // SECOND CLICK
+    // =========================
+
+    simulated_input = 1;
+
+    for (int i = 0; i < 50; i++)
+    {
+        buttonHandler();
+    }
+
     simulated_input = 0;
 
     for (int i = 0; i < 50; i++)
