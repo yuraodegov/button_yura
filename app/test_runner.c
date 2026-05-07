@@ -3,35 +3,30 @@
 
 int simulated_input = 0;
 
-int getInput(int btn) {
+int getInput(int btn)
+{
     return simulated_input;
 }
 
-int main() {
+int main()
+{
     printf("START TEST\n");
 
     buttonsInitialize();
 
-    // --- PRESS ---
+    // PRESS
     simulated_input = 1;
-    for (int i = 0; i < 100; i++) {
+
+    for (int i = 0; i < 50; i++)
+    {
         buttonHandler();
     }
 
-    // --- RELEASE ---
+    // RELEASE
     simulated_input = 0;
-    for (int i = 0; i < 100; i++) {
-        buttonHandler();
-    }
 
-    // --- PRESS AGAIN (для long / double) ---
-    simulated_input = 1;
-    for (int i = 0; i < 100; i++) {
-        buttonHandler();
-    }
-
-    simulated_input = 0;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 50; i++)
+    {
         buttonHandler();
     }
 

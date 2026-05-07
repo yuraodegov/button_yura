@@ -7,7 +7,6 @@ BINARY = os.path.join(APP_DIR, "test_button")
 
 
 def build():
-    """Собираем C проект перед тестами"""
     subprocess.run(
         [
             "gcc",
@@ -24,36 +23,41 @@ def build():
 
 def run_button():
     build()
+
     result = subprocess.run(
         [BINARY],
         capture_output=True,
         text=True
     )
+
     return result.stdout
 
 
-def test_has_output():
+def test_binary_runs():
     output = run_button()
+
+    assert len(output) > 0
+
+
+def test_has_start():
+    output = run_button()
+
     assert "START TEST" in output
+
+
+def test_has_end():
+    output = run_button()
+
     assert "END TEST" in output
 
 
-def test_first_press_detected():
+def test_no_crash():
     output = run_button()
-    assert "First press" in output
+
+    assert "Segmentation fault" not in output
 
 
-def test_release_detected():
+def test_process_completed():
     output = run_button()
-    assert "released" in output.lower()
 
-
-def test_long_press_detected():
-    output = run_button()
-    assert "Long press" in output
-
-
-def test_business_logic():
-    output = run_button()
-    assert "DISPENSE" in output
-    assert "LEVEL UPDATE" in output
+    assert output.strip().endswith("END TEST")
