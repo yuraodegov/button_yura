@@ -61,3 +61,9 @@ def test_process_completed():
     output = run_button()
 
     assert output.strip().endswith("END TEST")
+
+def test_multiple_clicks():
+    output = run_button()
+
+    assert "START TEST" in output
+    assert "END TEST" in output    
