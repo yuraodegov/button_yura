@@ -1,312 +1,134 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Button Simulator</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: monospace;
-            background: #1e1e2e;
-            color: #cdd6f4;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 40px;
-            color: #89b4fa;
-            letter-spacing: 2px;
-        }
-
-        .buttons-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-group span {
-            font-size: 12px;
-            color: #a6adc8;
-        }
-
-        .btn {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid #89b4fa;
-            background: #313244;
-            color: #cdd6f4;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.1s;
-            user-select: none;
-        }
-
-        .btn:active, .btn.pressed {
-            background: #89b4fa;
-            color: #1e1e2e;
-            transform: scale(0.95);
-        }
-
-        .event-badge {
-            margin-bottom: 20px;
-            padding: 10px 24px;
-            border-radius: 20px;
-            background: #313244;
-            font-size: 18px;
-            color: #a6e3a1;
-            min-width: 200px;
-            text-align: center;
-        }
-
-        .log {
-            width: 100%;
-            max-width: 500px;
-            background: #181825;
-            border-radius: 10px;
-            padding: 16px;
-            height: 250px;
-            overflow-y: auto;
-            font-size: 13px;
-        }
-
-        .log-entry {
-            padding: 4px 0;
-            border-bottom: 1px solid #313244;
-            color: #a6adc8;
-        }
-
-        .log-entry .event { color: #a6e3a1; font-weight: bold; }
-        .log-entry .error { color: #f38ba8; font-weight: bold; }
-        .log-entry .time { color: #6c7086; margin-right: 8px; }
-
-        /* ===== TEST UI ===== */
-
-        .tests-section {
-            width: 100%;
-            max-width: 500px;
-            margin-top: 30px;
-        }
-
-        .tests-section h2 {
-            color: #89b4fa;
-            font-size: 16px;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .test-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 12px;
-            margin-bottom: 6px;
-            background: #313244;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-
-        .test-status.idle    { color: #6c7086; }
-        .test-status.running { color: #fab387; }
-        .test-status.pass    { color: #a6e3a1; }
-        .test-status.fail    { color: #f38ba8; }
-
-        .run-all-btn {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            background: #89b4fa;
-            color: #1e1e2e;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .run-all-btn:disabled {
-            background: #45475a;
-            color: #6c7086;
-        }
-    </style>
-</head>
-<body>
-
-<h1>● BUTTON SIMULATOR</h1>
-
-<div class="buttons-row">
-    <button class="btn" id="btn1" onmousedown="press(1)" onmouseup="release(1)">BTN1</button>
-    <button class="btn" id="btn2" onmousedown="press(2)" onmouseup="release(2)">BTN2</button>
-    <button class="btn" id="btn3" onmousedown="press(3)" onmouseup="release(3)">BTN3</button>
-</div>
-
-<div class="event-badge" id="last-event">— no events —</div>
-<div class="log" id="log"></div>
-
-<!-- TESTS -->
-<div class="tests-section">
-    <h2>▶ TESTS</h2>
-    <button class="run-all-btn" id="run-all-btn" onclick="runAllTests()">RUN ALL TESTS</button>
-    <div id="test-list"></div>
-</div>
-
 <script>
+
 async function sendEvent(button, action) {
+
     const res = await fetch('/event', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({button, action})
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            button,
+            action
+        })
     });
+
     return res.json();
 }
 
-function press(b) {
-    document.getElementById('btn'+b).classList.add('pressed');
-    sendEvent(b,'press').then(update);
+function press(button) {
+
+    document
+        .getElementById('btn' + button)
+        .classList
+        .add('pressed');
+
+    sendEvent(button, 'press')
+        .then(update);
 }
 
-function release(b) {
-    document.getElementById('btn'+b).classList.remove('pressed');
-    sendEvent(b,'release').then(update);
+function release(button) {
+
+    document
+        .getElementById('btn' + button)
+        .classList
+        .remove('pressed');
+
+    sendEvent(button, 'release')
+        .then(update);
 }
 
-function update(data){
-    document.getElementById('last-event').textContent = JSON.stringify(data);
+function update(data) {
+
+    document.getElementById('last-event').textContent =
+        JSON.stringify(data);
 }
 
-/* ===== TESTS ===== */
+/* =========================================
+   REAL PYTEST RUNNER
+========================================= */
 
-const TESTS = [
-    "binary_runs",
-    "has_start",
-    "has_end",
-    "no_crash",
-    "process_completed",
-    "multiple_clicks",
-    "no_hello_world",
-    "fsm_flow",
-    "double_click"
-];
+async function runAllTests() {
 
-function renderTests(){
-    document.getElementById('test-list').innerHTML =
-        TESTS.map(t=>`<div>${t}: <span id="s_${t}">IDLE</span></div>`).join('');
-}
+    const btn =
+        document.getElementById('run-all-btn');
 
-async function test_binary_runs(){
-    return true;
-}
+    const list =
+        document.getElementById('test-list');
 
-async function test_has_start(){
-    let r = await sendEvent(1,'press');
-    if(!r) throw "No response";
-}
+    btn.disabled = true;
+    btn.textContent = "RUNNING...";
 
-async function test_has_end(){
-    let r = await sendEvent(1,'release');
-    if(!r) throw "No response";
-}
+    list.innerHTML = "Running pytest tests...";
 
-async function test_no_crash(){
-    let r = await sendEvent(1,'press');
-    if(r.error) throw r;
-}
+    try {
 
-async function test_process_completed(){
-    await sendEvent(1,'press');
-    await sleep(100);
-    let r = await sendEvent(1,'release');
+        const response = await fetch('/run-tests', {
+            method: 'POST'
+        });
 
-    if(!r.event) throw r;
-}
+        const data = await response.json();
 
-async function test_multiple_clicks(){
-    for(let i=0;i<3;i++){
-        await sendEvent(1,'press');
-        await sleep(100);
-        await sendEvent(1,'release');
-    }
-}
+        let output =
+            data.stdout + "\n" + data.stderr;
 
-async function test_no_hello_world(){
-    let r = await sendEvent(1,'press');
+        const lines = output.split("\n");
 
-    if(JSON.stringify(r).includes("HELLO WORLD"))
-        throw r;
-}
+        let html = "";
 
-async function test_fsm_flow(){
-    await sendEvent(1,'press');
-    await sleep(1000);
+        for (let line of lines) {
 
-    let r = await sendEvent(1,'release');
+            if (line.includes("PASSED")) {
 
-    if(!r.event)
-        throw r;
-}
+                html += `
+                    <div style="
+                        color:#a6e3a1;
+                        margin-bottom:4px;
+                    ">
+                        ${line}
+                    </div>
+                `;
+            }
 
-async function test_short_click(){
-    await sendEvent(1,'press'); await sleep(200);
-    let r=await sendEvent(1,'release');
-    if(r.event!=='SHORT_CLICK') throw r;
-}
+            else if (line.includes("FAILED")) {
 
-async function test_long_click(){
-    await sendEvent(1,'press'); await sleep(1500);
-    let r=await sendEvent(1,'release');
-    if(r.event!=='LONG_CLICK') throw r;
-}
+                html += `
+                    <div style="
+                        color:#f38ba8;
+                        margin-bottom:4px;
+                    ">
+                        ${line}
+                    </div>
+                `;
+            }
 
-async function test_double_click(){
-    await sendEvent(1,'press'); await sleep(100);
-    await sendEvent(1,'release');
-    await sleep(200);
-    await sendEvent(1,'press'); await sleep(100);
-    let r=await sendEvent(1,'release');
-    if(r.event!=='DOUBLE_CLICK') throw r;
-}
+            else {
 
-const MAP = {
-    binary_runs:test_binary_runs,
-    has_start:test_has_start,
-    has_end:test_has_end,
-    no_crash:test_no_crash,
-    process_completed:test_process_completed,
-    multiple_clicks:test_multiple_clicks,
-    no_hello_world:test_no_hello_world,
-    fsm_flow:test_fsm_flow,
-    double_click:test_double_click,
-
-    short_click:test_short_click,
-    long_click:test_long_click
-};
-
-async function runAllTests(){
-    for(let t of TESTS){
-        let el=document.getElementById('s_'+t);
-        el.textContent='RUN';
-        try{
-            await MAP[t]();
-            el.textContent='PASS';
-        }catch{
-            el.textContent='FAIL';
+                html += `
+                    <div style="
+                        color:#cdd6f4;
+                        margin-bottom:2px;
+                    ">
+                        ${line}
+                    </div>
+                `;
+            }
         }
+
+        list.innerHTML = html;
     }
+
+    catch (err) {
+
+        list.innerHTML = `
+            <div style="color:red">
+                ERROR: ${err}
+            </div>
+        `;
+    }
+
+    btn.disabled = false;
+    btn.textContent = "RUN ALL TESTS";
 }
 
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-
-renderTests();
 </script>
-
-</body>
-</html>
