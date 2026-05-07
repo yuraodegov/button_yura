@@ -82,7 +82,7 @@ static void button_first_click(uint8_t button)
 		if (getDispenserState() == DISPENSER_READY)
 		{
 			//printf("HELLO WORLD\n");
-			//SodaDispenseMs(1);
+			SodaDispenseMs(1);
 
 		}
 		else
