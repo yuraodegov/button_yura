@@ -18,7 +18,7 @@ The project includes automated integration testing, containerized deployment, an
 
 ## 🌐 Live Demo
 
-http://ec2-13-60-47-3.eu-north-1.compute.amazonaws.com:5000/ui
+[http://ec2-13-60-47-3.eu-north-1.compute.amazonaws.com:5000/ui](https://ominous-system-69575vpv4j7j24q9q-5000.app.github.dev/ui)
 
 ---
 
