@@ -35,6 +35,40 @@ class Handler(BaseHTTPRequestHandler):
             with open(ui_path, "r") as f:
                 self.wfile.write(f.read().encode())
 
+        # =========================================
+        # FSM STATUS
+        # =========================================
+
+        elif self.path == "/status":
+            hostname = socket.gethostname()
+
+            buttons_status = {}
+            for btn_id, btn in simulator.buttons.items():
+                import time
+                now = time.time()
+                held_ms = None
+                if btn["state"] == "PRESSED" and btn["press_time"]:
+                    held_ms = round((now - btn["press_time"]) * 1000)
+
+                buttons_status[btn_id] = {
+                    "state": btn["state"],
+                    "held_ms": held_ms,
+                    "last_release_time": btn["last_release_time"],
+                }
+
+            response = {
+                "pod": hostname,
+                "long_press_threshold_ms": int(simulator.long_press_threshold * 1000),
+                "double_click_window_ms":  int(simulator.double_click_window * 1000),
+                "buttons": buttons_status,
+            }
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(json.dumps(response).encode())
+
         else:
             self.send_response(404)
             self.end_headers()
@@ -54,7 +88,6 @@ class Handler(BaseHTTPRequestHandler):
 
             try:
                 data = json.loads(body)
-
             except Exception:
                 self.send_response(400)
                 self.end_headers()
@@ -63,17 +96,14 @@ class Handler(BaseHTTPRequestHandler):
             button = data.get("button")
             action = data.get("action")
 
-            # FSM logic
             result = simulator.handle_event(button, action)
 
-            # add pod/container hostname
             hostname = socket.gethostname()
             result["pod"] = hostname
 
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-
             self.wfile.write(json.dumps(result).encode())
 
         # =========================================
@@ -97,7 +127,6 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-
             self.wfile.write(json.dumps(response).encode())
 
         else:
@@ -109,9 +138,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-
-    print("Server running on port 5000...")
-
-    server = HTTPServer(("0.0.0.0", 5000), Handler)
-
+    port = int(os.environ.get("PORT", 5000))
+    print(f"Server running on port {port}...")
+    server = HTTPServer(("0.0.0.0", port), Handler)
     server.serve_forever()

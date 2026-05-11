@@ -324,6 +324,60 @@
   .h-entry .ts { color: var(--accent2); margin-right: 8px; }
   .h-entry .ev { color: var(--text); }
 
+  /* ── fsm status panel ── */
+  .fsm-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .fsm-btn-card {
+    flex: 1;
+    min-width: 140px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    transition: border-color .3s;
+  }
+  .fsm-btn-card.active { border-color: var(--accent); }
+  .fsm-btn-card .card-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    margin-bottom: 6px;
+  }
+  .fsm-state {
+    font-size: 13px;
+    color: var(--accent2);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .fsm-state.PRESSED { color: var(--warn); }
+  .fsm-state.IDLE    { color: var(--dim); }
+  .fsm-held {
+    font-size: 11px;
+    color: var(--warn);
+    margin-top: 4px;
+    min-height: 16px;
+  }
+  .fsm-meta {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .fsm-meta span { color: var(--text); }
+
   /* ── keyboard hint ── */
   .kb-hint {
     font-size: 10px;
@@ -484,6 +538,12 @@
     </div>
   </div>
 
+  <!-- fsm live status -->
+  <div class="label">// FSM LIVE STATE <span id="poll-indicator" style="color:var(--dim);font-size:10px"></span></div>
+  <div class="fsm-panel" id="fsm-panel">
+    <div class="t-dim" style="font-size:12px">// waiting for first event...</div>
+  </div>
+
   <!-- run tests -->
   <button id="run-btn" onclick="runTests()"><span>▶ RUN ALL TESTS</span></button>
   <div id="progress"><div id="progress-bar"></div></div>
@@ -521,17 +581,66 @@ const holdTimers  = {};   // setTimeout for 'holding' ring
 const holdStart   = {};   // Date.now() when press began
 const holdTickers = {};   // setInterval for ms counter
 
+// ── FSM status polling ─────────────────────────────────────────────────────
+let pollActive = true;
+
+async function pollStatus() {
+  if (!pollActive) return;
+  try {
+    const res  = await fetch('/status');
+    const data = await res.json();
+    renderFsmPanel(data);
+    setBadge('server', 'ok');
+  } catch {
+    setBadge('server', 'err');
+  }
+  setTimeout(pollStatus, 1000);
+}
+
+function renderFsmPanel(data) {
+  const panel = document.getElementById('fsm-panel');
+  const btns  = data.buttons || {};
+
+  if (Object.keys(btns).length === 0) {
+    panel.innerHTML = '<div class="t-dim" style="font-size:12px">// no buttons interacted yet</div>';
+    return;
+  }
+
+  let html = '';
+  for (const [id, b] of Object.entries(btns)) {
+    const isActive = b.state === 'PRESSED';
+    html += `
+      <div class="fsm-btn-card ${isActive ? 'active' : ''}">
+        <div class="card-title">BTN ${id}</div>
+        <div class="fsm-state ${b.state}">${b.state}</div>
+        <div class="fsm-held">${b.held_ms != null ? '⏱ ' + b.held_ms + ' ms' : ''}</div>
+      </div>`;
+  }
+
+  html += `<div class="fsm-meta">
+    long_press: <span>${data.long_press_threshold_ms}ms</span>
+    &nbsp;|&nbsp; double_click: <span>${data.double_click_window_ms}ms</span>
+    &nbsp;|&nbsp; pod: <span>${data.pod || '—'}</span>
+  </div>`;
+
+  panel.innerHTML = html;
+
+  // blink poll indicator
+  const ind = document.getElementById('poll-indicator');
+  ind.textContent = '●';
+  ind.style.color = 'var(--accent)';
+  setTimeout(() => { ind.style.color = 'var(--dim)'; }, 200);
+}
+
+pollStatus();
+
 // ── badge helpers ──────────────────────────────────────────────────────────
 function setBadge(id, state) {
   const el = document.getElementById('badge-' + id);
   el.className = 'badge' + (state ? ' ' + state : '');
 }
 
-function pingServer() {
-  fetch('/').then(r => setBadge('server', r.ok ? 'ok' : 'err'))
-            .catch(() => setBadge('server', 'err'));
-}
-pingServer();
+function pingServer() { /* replaced by pollStatus */ }
 
 // ── event display ──────────────────────────────────────────────────────────
 function renderEvent(data) {
