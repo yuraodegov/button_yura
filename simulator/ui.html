@@ -324,6 +324,93 @@
   .h-entry .ts { color: var(--accent2); margin-right: 8px; }
   .h-entry .ev { color: var(--text); }
 
+  /* ── keyboard hint ── */
+  .kb-hint {
+    font-size: 10px;
+    color: var(--dim);
+    margin-top: 8px;
+    letter-spacing: 1px;
+    text-align: center;
+    width: 110px;
+  }
+  .kb-hint kbd {
+    background: var(--border);
+    border: 1px solid #2e2e45;
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 10px;
+  }
+
+  /* ── hold timer ── */
+  .hold-timer {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 6px;
+    min-height: 16px;
+    text-align: center;
+    width: 110px;
+    transition: color .2s;
+  }
+  .hold-timer.active { color: var(--warn); }
+  .hold-timer.long   { color: var(--danger); }
+
+  /* ── sequence recorder ── */
+  .seq-wrap {
+    margin-top: 32px;
+  }
+  .seq-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .seq-btn {
+    padding: 8px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .seq-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .seq-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+  .seq-btn.recording { border-color: var(--danger); color: var(--danger); animation: pulse-rec .8s ease infinite; }
+  .seq-btn.playing   { border-color: var(--pass);   color: var(--pass); }
+  @keyframes pulse-rec {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,77,109,0); }
+    50%      { box-shadow: 0 0 0 4px rgba(255,77,109,.3); }
+  }
+  #seq-tape {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    min-height: 52px;
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--dim);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .seq-chip {
+    background: var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .seq-chip.press   { color: var(--accent); border-left: 2px solid var(--accent); }
+  .seq-chip.release { color: var(--accent2); border-left: 2px solid var(--accent2); }
+  .seq-chip.active  { background: var(--accent2); color: #fff; }
+
   /* scrollbar */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -342,21 +429,33 @@
   <!-- buttons -->
   <div class="label">// INPUT CONTROLS</div>
   <div class="btn-row">
-    <button class="hw-btn" id="b1"
-      onmousedown="press(1)" onmouseup="release(1)" onmouseleave="release(1)"
-      ontouchstart="press(1)" ontouchend="release(1)">
-      <div class="ring"></div>BTN 1
-    </button>
-    <button class="hw-btn" id="b2"
-      onmousedown="press(2)" onmouseup="release(2)" onmouseleave="release(2)"
-      ontouchstart="press(2)" ontouchend="release(2)">
-      <div class="ring"></div>BTN 2
-    </button>
-    <button class="hw-btn" id="b3"
-      onmousedown="press(3)" onmouseup="release(3)" onmouseleave="release(3)"
-      ontouchstart="press(3)" ontouchend="release(3)">
-      <div class="ring"></div>BTN 3
-    </button>
+    <div style="display:flex;flex-direction:column;align-items:center">
+      <button class="hw-btn" id="b1"
+        onmousedown="press(1)" onmouseup="release(1)" onmouseleave="release(1)"
+        ontouchstart="press(1)" ontouchend="release(1)">
+        <div class="ring"></div>BTN 1
+      </button>
+      <div class="kb-hint"><kbd>1</kbd> hold</div>
+      <div class="hold-timer" id="ht1">—</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center">
+      <button class="hw-btn" id="b2"
+        onmousedown="press(2)" onmouseup="release(2)" onmouseleave="release(2)"
+        ontouchstart="press(2)" ontouchend="release(2)">
+        <div class="ring"></div>BTN 2
+      </button>
+      <div class="kb-hint"><kbd>2</kbd> hold</div>
+      <div class="hold-timer" id="ht2">—</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center">
+      <button class="hw-btn" id="b3"
+        onmousedown="press(3)" onmouseup="release(3)" onmouseleave="release(3)"
+        ontouchstart="press(3)" ontouchend="release(3)">
+        <div class="ring"></div>BTN 3
+      </button>
+      <div class="kb-hint"><kbd>3</kbd> hold</div>
+      <div class="hold-timer" id="ht3">—</div>
+    </div>
   </div>
 
   <!-- live event -->
@@ -397,6 +496,17 @@
 
   <div id="test-out"><span class="t-dim">// run tests to see output</span></div>
 
+  <!-- sequence recorder -->
+  <div class="seq-wrap">
+    <div class="label">// SEQUENCE RECORDER <span id="rec-status" style="color:var(--danger)"></span></div>
+    <div class="seq-controls">
+      <button class="seq-btn" id="rec-btn" onclick="toggleRecord()">⏺ RECORD</button>
+      <button class="seq-btn" id="play-btn" onclick="playSequence()">▶ PLAY</button>
+      <button class="seq-btn danger" onclick="clearSequence()">✕ CLEAR</button>
+    </div>
+    <div id="seq-tape"><span class="t-dim">// no sequence recorded</span></div>
+  </div>
+
   <!-- history -->
   <div class="history-wrap">
     <div class="label">// EVENT HISTORY</div>
@@ -407,10 +517,12 @@
 
 <script>
 // ── state ──────────────────────────────────────────────────────────────────
-const holdTimers = {};
+const holdTimers  = {};   // setTimeout for 'holding' ring
+const holdStart   = {};   // Date.now() when press began
+const holdTickers = {};   // setInterval for ms counter
 
 // ── badge helpers ──────────────────────────────────────────────────────────
-function setBadge(id, state) { // 'ok' | 'err' | 'warn' | ''
+function setBadge(id, state) {
   const el = document.getElementById('badge-' + id);
   el.className = 'badge' + (state ? ' ' + state : '');
 }
@@ -424,7 +536,6 @@ pingServer();
 // ── event display ──────────────────────────────────────────────────────────
 function renderEvent(data) {
   document.getElementById('pod-name').textContent = data.pod || '—';
-
   const box = document.getElementById('event-box');
   box.innerHTML = Object.entries(data).map(([k, v]) => {
     let cls = 'v';
@@ -434,17 +545,10 @@ function renderEvent(data) {
     return `<div class="event-line"><span class="k">${k}: </span><span class="${cls}">${JSON.stringify(v)}</span></div>`;
   }).join('');
 
-  // update FSM badge
-  if (data.error) {
-    setBadge('fsm', 'err');
-  } else {
-    setBadge('fsm', 'ok');
-  }
-
-  // check dispense / level in state string
-  const stateStr = JSON.stringify(data).toLowerCase();
-  if (stateStr.includes('dispense')) setBadge('dispense', 'ok');
-  if (stateStr.includes('level'))    setBadge('level', 'ok');
+  setBadge('fsm', data.error ? 'err' : 'ok');
+  const s = JSON.stringify(data).toLowerCase();
+  if (s.includes('dispense')) setBadge('dispense', 'ok');
+  if (s.includes('level'))    setBadge('level', 'ok');
 
   addHistory(data);
 }
@@ -452,6 +556,8 @@ function renderEvent(data) {
 // ── history ────────────────────────────────────────────────────────────────
 function addHistory(data) {
   const log = document.getElementById('history');
+  // clear placeholder
+  if (log.querySelector('.t-dim')) log.innerHTML = '';
   const ts  = new Date().toLocaleTimeString('en-GB', {hour12: false});
   const btn = data.button ?? '?';
   const act = data.action ?? data.state ?? JSON.stringify(data);
@@ -459,6 +565,30 @@ function addHistory(data) {
   entry.className = 'h-entry';
   entry.innerHTML = `<span class="ts">${ts}</span><span class="ev">BTN${btn} → ${act}</span>`;
   log.prepend(entry);
+}
+
+// ── hold timer display ─────────────────────────────────────────────────────
+function startHoldTimer(btn) {
+  holdStart[btn] = Date.now();
+  const el = document.getElementById('ht' + btn);
+  holdTickers[btn] = setInterval(() => {
+    const ms = Date.now() - holdStart[btn];
+    el.textContent = ms + ' ms';
+    el.className = 'hold-timer' + (ms > 500 ? ms > 1500 ? ' long' : ' active' : '');
+  }, 50);
+}
+
+function stopHoldTimer(btn) {
+  clearInterval(holdTickers[btn]);
+  const el = document.getElementById('ht' + btn);
+  if (holdStart[btn]) {
+    const ms = Date.now() - holdStart[btn];
+    el.textContent = ms + ' ms held';
+  } else {
+    el.textContent = '—';
+  }
+  el.className = 'hold-timer';
+  delete holdStart[btn];
 }
 
 // ── button press / release ─────────────────────────────────────────────────
@@ -473,11 +603,11 @@ async function sendEvent(button, action) {
 
 function press(btn) {
   const el = document.getElementById('b' + btn);
+  if (el.classList.contains('pressed')) return; // already pressed (keydown repeat)
   el.classList.add('pressed');
-
-  // hold indicator after 500ms
   holdTimers[btn] = setTimeout(() => el.classList.add('holding'), 500);
-
+  startHoldTimer(btn);
+  if (recording) recordStep(btn, 'press');
   sendEvent(btn, 'press').then(renderEvent).catch(console.error);
 }
 
@@ -486,8 +616,113 @@ function release(btn) {
   if (!el.classList.contains('pressed')) return;
   el.classList.remove('pressed', 'holding');
   clearTimeout(holdTimers[btn]);
-
+  stopHoldTimer(btn);
+  if (recording) recordStep(btn, 'release');
   sendEvent(btn, 'release').then(renderEvent).catch(console.error);
+}
+
+// ── keyboard shortcuts ─────────────────────────────────────────────────────
+const keyMap = {'1': 1, '2': 2, '3': 3};
+
+document.addEventListener('keydown', e => {
+  if (e.repeat) return;
+  if (e.target.tagName === 'INPUT') return;
+  if (keyMap[e.key]) press(keyMap[e.key]);
+  if (e.key === 'r' || e.key === 'R') toggleRecord();
+  if (e.key === 'p' || e.key === 'P') playSequence();
+  if (e.key === ' ') { e.preventDefault(); [1,2,3].forEach(release); }
+});
+
+document.addEventListener('keyup', e => {
+  if (keyMap[e.key]) release(keyMap[e.key]);
+});
+
+// ── sequence recorder ──────────────────────────────────────────────────────
+let recording = false;
+let sequence  = [];   // [{btn, action, delay}]
+let lastRecordTime = null;
+
+function toggleRecord() {
+  recording = !recording;
+  const btn = document.getElementById('rec-btn');
+  const status = document.getElementById('rec-status');
+  if (recording) {
+    sequence = [];
+    lastRecordTime = Date.now();
+    btn.textContent = '⏹ STOP';
+    btn.className = 'seq-btn recording';
+    status.textContent = '● REC';
+    renderTape();
+  } else {
+    btn.textContent = '⏺ RECORD';
+    btn.className = 'seq-btn';
+    status.textContent = '';
+    renderTape();
+  }
+}
+
+function recordStep(btn, action) {
+  const now   = Date.now();
+  const delay = lastRecordTime ? now - lastRecordTime : 0;
+  lastRecordTime = now;
+  sequence.push({btn, action, delay});
+  renderTape();
+}
+
+function clearSequence() {
+  sequence = [];
+  recording = false;
+  document.getElementById('rec-btn').textContent = '⏺ RECORD';
+  document.getElementById('rec-btn').className = 'seq-btn';
+  document.getElementById('rec-status').textContent = '';
+  renderTape();
+}
+
+function renderTape() {
+  const tape = document.getElementById('seq-tape');
+  if (sequence.length === 0) {
+    tape.innerHTML = '<span class="t-dim">// no sequence recorded</span>';
+    return;
+  }
+  tape.innerHTML = sequence.map((s, i) =>
+    `<span class="seq-chip ${s.action}" data-i="${i}">
+      BTN${s.btn} ${s.action === 'press' ? '▼' : '▲'}
+      <span style="color:var(--dim);font-size:10px"> +${s.delay}ms</span>
+    </span>`
+  ).join('');
+}
+
+let playing = false;
+
+async function playSequence() {
+  if (playing || sequence.length === 0) return;
+  playing = true;
+  const playBtn = document.getElementById('play-btn');
+  playBtn.className = 'seq-btn playing';
+  playBtn.textContent = '▶ PLAYING...';
+
+  const chips = document.getElementById('seq-tape').querySelectorAll('.seq-chip');
+
+  for (let i = 0; i < sequence.length; i++) {
+    const step = sequence[i];
+    await new Promise(r => setTimeout(r, step.delay));
+    if (chips[i]) chips[i].classList.add('active');
+    await sendEvent(step.btn, step.action).then(renderEvent).catch(console.error);
+    // sync visual button state
+    if (step.action === 'press') {
+      document.getElementById('b' + step.btn)?.classList.add('pressed');
+    } else {
+      document.getElementById('b' + step.btn)?.classList.remove('pressed', 'holding');
+    }
+    if (chips[i]) chips[i].classList.remove('active');
+  }
+
+  // release all after playback
+  [1,2,3].forEach(b => document.getElementById('b'+b)?.classList.remove('pressed','holding'));
+
+  playing = false;
+  playBtn.className = 'seq-btn';
+  playBtn.textContent = '▶ PLAY';
 }
 
 // ── run tests ──────────────────────────────────────────────────────────────
@@ -504,7 +739,6 @@ async function runTests() {
   out.innerHTML = '<span class="t-dim">// executing pytest...</span>';
   sum.classList.remove('show');
 
-  // animate progress bar
   let pct = 0;
   const ticker = setInterval(() => {
     pct = Math.min(pct + Math.random() * 8, 88);
@@ -519,14 +753,12 @@ async function runTests() {
     bar.style.width = '100%';
 
     const raw = (data.stdout + '\n' + data.stderr).split('\n');
-
-    let passed = 0, failed = 0;
-    let html = '';
+    let passed = 0, failed = 0, html = '';
 
     for (const line of raw) {
       let cls = 't-dim';
-      if (/PASSED/.test(line))  { cls = 't-pass'; passed++; }
-      else if (/FAILED|ERROR/.test(line)) { cls = 't-fail'; failed++; }
+      if (/PASSED/.test(line))           { cls = 't-pass'; passed++; }
+      else if (/FAILED|ERROR/.test(line)){ cls = 't-fail'; failed++; }
       else if (/WARNING/.test(line))       cls = 't-warn';
       else if (/={3,}|_{3,}/.test(line))  cls = 't-head';
       html += `<div class="t-line ${cls}">${escHtml(line)}</div>`;
@@ -534,14 +766,11 @@ async function runTests() {
 
     out.innerHTML = html;
 
-    // summary
     const total = passed + failed;
     document.getElementById('s-pass').textContent  = `✓ ${passed} passed`;
     document.getElementById('s-fail').textContent  = `✗ ${failed} failed`;
     document.getElementById('s-total').textContent = `${total} total`;
     sum.classList.add('show');
-
-    // badge
     setBadge('tests', failed === 0 && total > 0 ? 'ok' : failed > 0 ? 'err' : 'warn');
 
   } catch (err) {
