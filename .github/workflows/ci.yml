@@ -35,9 +35,9 @@ jobs:
           name: test_button
           path: app/test_button
 
-  # ── 2. тесты C бинарника ──────────────────────────────────────────────
-  test-c:
-    name: Pytest — C binary tests
+  # ── 2. все тесты (C бинарник + HTTP сервер) ───────────────────────────
+  test:
+    name: Pytest — all tests
     runs-on: ubuntu-latest
     needs: build-c
     steps:
@@ -60,32 +60,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run C binary tests
+      - name: Run all tests
         run: python -m pytest tests/test_buttons.py -v --tb=short
 
-  # ── 3. тесты HTTP сервера ─────────────────────────────────────────────
-  test-server:
-    name: Pytest — HTTP server tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run server tests
-        run: python -m pytest tests/test_server.py -v --tb=short
-
-  # ── 4. сборка Docker образа ───────────────────────────────────────────
+  # ── 3. сборка Docker образа ───────────────────────────────────────────
   build-docker:
     name: Build Docker image
     runs-on: ubuntu-latest
-    needs: [test-c, test-server]
+    needs: [test]
     steps:
       - uses: actions/checkout@v4
 
@@ -99,7 +81,7 @@ jobs:
           curl -f http://localhost:5000/ || (docker logs smoke && exit 1)
           docker stop smoke
 
-  # ── 5. деплой на EC2 ──────────────────────────────────────────────────
+  # ── 4. деплой на EC2 ──────────────────────────────────────────────────
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
