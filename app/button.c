@@ -180,7 +180,7 @@ void buttonHandler(void)
 			}
 			else if (timerTimeOut(&push_button[i].timer, BUTTON_WAIT_FOR_RLEASE) == TIMER_TIMEOUT)
 			{
-				//push_button[i].state++;
+				push_button[i].state++;
 				break;
 			}
 
